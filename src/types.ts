@@ -374,15 +374,16 @@ export interface FormattedProperty {
   file?: any
 }
 
-/** Local item used strictly for convenience and not part of the API. */
-export type FormattedItem = Realtime.Item & {
+export type InternalItemData = {
   formatted: FormattedProperty
+  truncated: boolean
 }
 
 /** Local item used strictly for convenience and not part of the API. */
-export type MaybeFormattedItem = Realtime.Item & {
-  formatted?: FormattedProperty
-}
+export type FormattedItem = Realtime.Item & InternalItemData
+
+/** Local item used strictly for convenience and not part of the API. */
+export type MaybeFormattedItem = Realtime.Item & Partial<InternalItemData>
 
 export interface EventHandlerResult {
   item?: MaybeFormattedItem

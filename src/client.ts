@@ -7,6 +7,7 @@ import type {
 import type {
   EventHandlerResult,
   FormattedTool,
+  MaybeFormattedItem,
   Realtime,
   ToolHandler
 } from './types'
@@ -94,7 +95,11 @@ export class RealtimeClient extends RealtimeEventHandler<
     this.relay = !!relay
 
     this.realtime = new RealtimeAPI(apiParams)
-    this.conversation = new RealtimeConversation({ debug: apiParams.debug })
+    this.conversation = new RealtimeConversation({
+      debug: apiParams.debug,
+      frequency:
+        this.defaultSessionConfig.input_audio_format === 'pcm16' ? 24_000 : 8000
+    })
 
     this._resetConfig()
     this._addAPIEventHandlers()
@@ -160,7 +165,7 @@ export class RealtimeClient extends RealtimeEventHandler<
       return res
     }
 
-    const callTool = async (tool: FormattedTool) => {
+    const callTool = async (tool: FormattedTool, item: MaybeFormattedItem) => {
       // In relay mode, we don't attempt to call tools. That is the
       // responsibility of the upstream client.
       if (this.isRelay) return
@@ -193,7 +198,9 @@ export class RealtimeClient extends RealtimeEventHandler<
         })
       }
 
-      this.createResponse()
+      if (item.truncated !== true) {
+        this.createResponse()
+      }
     }
 
     // Handlers to update internal conversation state
@@ -263,8 +270,8 @@ export class RealtimeClient extends RealtimeEventHandler<
           })
         }
 
-        if (res.item.formatted.tool) {
-          callTool(res.item.formatted.tool)
+        if (res.item.formatted && res.item.formatted.tool) {
+          callTool(res.item.formatted.tool, res.item)
         }
       }
     )

@@ -120,7 +120,8 @@ export class RealtimeConversation {
           audio: new Int16Array(0),
           text: '',
           transcript: ''
-        }
+        },
+        truncated: false
       }
 
       if (!this.itemLookup[newItem.id]) {
@@ -189,7 +190,7 @@ export class RealtimeConversation {
       const endIndex = Math.floor((audio_end_ms * this.frequency) / 1000)
       item.formatted.transcript = ''
       item.formatted.audio = item.formatted.audio!.slice(0, endIndex)
-
+      item.truncated = true
       return { item }
     },
 
